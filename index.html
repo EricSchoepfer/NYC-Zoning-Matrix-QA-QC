@@ -1,174 +1,255 @@
-// ==========================================================================
-// NYC Custom Zoning Matrix Builder - Core Fixed Logic Engine (script.js)
-// ==========================================================================
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NYC Custom Zoning Matrix Builder</title>
+    <style>
+        :root { 
+            --primary-color: #1e3a8a; 
+            --primary-light: #eff6ff; 
+            --accent-color: #0d9488; 
+            --text-main: #1f2937; 
+            --text-muted: #4b5563; 
+            --bg-main: #f3f4f6; 
+            --border-color: #e5e7eb; 
+            --mandatory-color: #ef4444; 
+        } 
+        body { 
+            font-family: Arial, sans-serif; 
+            background-color: var(--bg-main); 
+            color: var(--text-main); 
+            margin: 0; 
+            padding: 20px; 
+        } 
+        .container { 
+            max-width: 1200px; 
+            margin: 0 auto; 
+        } 
+        header { 
+            background-color: var(--primary-color); 
+            color: white; 
+            padding: 20px 0; 
+            margin-bottom: 24px; 
+            text-align: center; 
+            border-radius: 6px; 
+        } 
+        header h1 { 
+            margin: 0; 
+            font-size: 1.6rem; 
+        } 
+        .subtitle { 
+            margin: 4px 0 0 0; 
+            opacity: 0.85; 
+            font-size: 0.9rem; 
+        } 
+        .card { 
+            background: white; 
+            border-radius: 8px; 
+            padding: 20px; 
+            margin-bottom: 20px; 
+            border: 1px solid var(--border-color); 
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05); 
+        } 
+        h2 { 
+            margin-top: 0; 
+            font-size: 1.2rem; 
+            color: var(--primary-color); 
+            border-bottom: 2px solid var(--primary-light); 
+            padding-bottom: 6px; 
+        } 
+        p { 
+            font-size: 0.85rem; 
+            color: var(--text-muted); 
+            margin-top: -4px; 
+        } 
+        .search-grid { 
+            display: grid; 
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); 
+            gap: 20px; 
+            margin-top: 15px; 
+        } 
+        select, input[type="text"], input[type="number"] { 
+            width: 100%; 
+            padding: 12px; 
+            border: 2px solid var(--border-color); 
+            border-radius: 4px; 
+            font-size: 1rem; 
+            box-sizing: border-box; 
+            outline: none; 
+            background-color: #ffffff;
+        } 
+        select:focus, input[type="text"]:focus, input[type="number"]:focus { 
+            border-color: var(--accent-color); 
+        } 
+        label {
+            font-size: 0.8rem;
+            font-weight: bold;
+            color: var(--primary-color);
+            display: block;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 4px;
+        }
+        label input[type="checkbox"] {
+            margin-right: 8px;
+            transform: scale(1.1);
+            vertical-align: middle;
+            cursor: pointer;
+        }
+        button { 
+            background-color: var(--primary-color); 
+            color: white; 
+            border: none; 
+            padding: 15px 24px; 
+            font-size: 1.1rem; 
+            font-weight: bold; 
+            border-radius: 4px; 
+            cursor: pointer; 
+            width: 100%; 
+            margin-top: 20px; 
+            text-transform: uppercase;
+        } 
+        button:hover { 
+            background-color: #12255c; 
+        } 
+        .info-grid { 
+            display: grid; 
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); 
+            gap: 12px; 
+            margin-top: 10px; 
+        } 
+        .info-item { 
+            padding: 12px; 
+            background-color: #eff6ff; 
+            border-left: 4px solid #1e3a8a; 
+            border-radius: 4px; 
+            font-size: 0.9rem; 
+        } 
+        .info-item strong { 
+            display: block; 
+            color: var(--primary-color); 
+            font-size: 0.75rem; 
+            text-transform: uppercase; 
+            margin-bottom: 2px; 
+        } 
+        table { 
+            width: 100%; 
+            border-collapse: collapse; 
+            text-align: left; 
+            margin-top: 15px; 
+            font-size: 0.85rem; 
+        } 
+        th { 
+            background-color: var(--primary-light); 
+            color: var(--primary-color); 
+            padding: 10px; 
+            font-weight: bold; 
+            border: 1px solid #e5e7eb; 
+        } 
+        td { 
+            padding: 10px; 
+            border: 1px solid #e5e7eb; 
+            vertical-align: top; 
+        } 
+        tr:hover { 
+            background-color: #f9fafb; 
+        } 
+        .metric-box { 
+            background-color: #fff; 
+            border: 2px solid var(--border-color); 
+            border-radius: 6px; 
+            padding: 15px; 
+            text-align: center; 
+        } 
+        .metric-val { 
+            font-size: 1.4rem; 
+            font-weight: bold; 
+            color: var(--primary-color); 
+            margin-top: 5px; 
+        } 
+        .metric-label { 
+            font-size: 0.75rem; 
+            text-transform: uppercase; 
+            color: var(--text-muted); 
+            font-weight: bold; 
+        }
+        #matrixOutputWrapper {
+            animation: matrixFadeIn 0.35s ease-in-out forwards;
+        }
+        @keyframes matrixFadeIn {
+            from { opacity: 0; transform: translateY(8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @media (max-width: 900px) {
+            #outputSplitGrid { grid-template-columns: 1fr !important; }
+            #sidebarStickyCard { position: static !important; margin-top: 20px; }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="header-container">
+            <h1>NYC Zoning Cross-Reference App</h1>
+            <p class="subtitle">Dual Search Engine: Sandbox Address & Tax Lot Calculator</p>
+        </div>
+    </header>
 
-const zoningRules = {
-  "R1":   { stdFar: 0.50, uapFar: 0.50, resUses: "Single-Family Detached Homes", cfUses: "Basic Community Facilities" },
-  "R2":   { stdFar: 0.50, uapFar: 0.50, resUses: "Single-Family Detached Homes", cfUses: "Basic Community Facilities" },
-  "R3":   { stdFar: 0.50, uapFar: 0.60, resUses: "Low-Rise Contextual Multifamily", cfUses: "Ambulatory, Houses of Worship" },
-  "R4":   { stdFar: 0.75, uapFar: 0.90, resUses: "Detached/Semi-Detached Rowhouses", cfUses: "Local Schools, Houses of Worship" },
-  "R5":   { stdFar: 1.25, uapFar: 1.65, resUses: "Single/Two-Family Attached Units", cfUses: "Medical Offices, Community Hubs" },
-  "R6":   { stdFar: 2.20, uapFar: 3.60, resUses: "Medium-Density Residential Complexes", cfUses: "Hospitals, Libraries, Schools" },
-  "R6B":  { stdFar: 2.00, uapFar: 2.20, resUses: "Traditional Contextual Townhouses", cfUses: "Neighborhood Local Assets" },
-  "R7":   { stdFar: 3.44, uapFar: 4.60, resUses: "Medium-High Density Apartment Frames", cfUses: "Healthcare, Large Service Buildings" },
-  "R7-1": { stdFar: 3.44, uapFar: 4.60, resUses: "Height Factor / Quality Housing Track", cfUses: "Ambulatory Care, Educational Facilities" },
-  "R7A":  { stdFar: 4.00, uapFar: 4.60, resUses: "High-Density Quality Housing Assets", cfUses: "Hospitals, Non-Profit Institutions" },
-  "R7X":  { stdFar: 5.00, uapFar: 6.00, resUses: "High-Bulk Contextual Multi-Family Envelopes", cfUses: "Medical Research, Public Libraries" },
-  "R8":   { stdFar: 6.02, uapFar: 7.20, resUses: "High-Density Core Urban Apartments", cfUses: "Hospitals, Academic Complexes" },
-  "R10":  { stdFar: 10.00, uapFar: 12.00, resUses: "Maximum Density High-Rise Housing Towers", cfUses: "Full Research Hospitals, Libraries" },
-  "C1":   { stdFar: 2.00, uapFar: 2.40, resUses: "Commercial Hub Mixed Residential", cfUses: "Local Neighborhood Retail Outlets" },
-  "C2":   { stdFar: 2.00, uapFar: 2.40, resUses: "Commercial District Retail Layouts", cfUses: "Service Stations, Business Offices" },
-  "C4":   { stdFar: 3.40, uapFar: 4.00, resUses: "Mixed-Use Commercial Office Footprints", cfUses: "Regional Malls, Training Centers" },
-  "C4-6": { stdFar: 10.00, uapFar: 12.00, resUses: "High-Bulk Central Business Core Buildings", cfUses: "Commercial Skyscrapers, Health Towers" },
-  "C5":   { stdFar: 10.00, uapFar: 12.00, resUses: "Central Commercial Skyscraper Profiles", cfUses: "Corporate Headquarters, Retail Hubs" },
-  "C6":   { stdFar: 10.00, uapFar: 12.00, resUses: "High-Bulk Commercial Entertainment Zones", cfUses: "Theaters, Corporate Business Hubs" },
-  "C7":   { stdFar: 2.00, uapFar: 2.00, resUses: "Amusement Parks & Large Recreation Units", cfUses: "Open Air Entertainment, Arenas" },
-  "C8":   { stdFar: 1.00, uapFar: 1.00, resUses: "🚫 Standalone Residential Prohibited", cfUses: "Automotive Repair, Heavy Showrooms" },
-  "M1":   { stdFar: 1.00, uapFar: 1.00, resUses: "🚫 Standalone Residential Prohibited", cfUses: "Light Industrial Performance Envelopes" },
-  "M2":   { stdFar: 2.00, uapFar: 2.00, resUses: "🚫 Standalone Residential Prohibited", cfUses: "Medium Manufacturing Storage Yards" },
-  "M3":   { stdFar: 3.00, uapFar: 3.00, resUses: "🚫 Standalone Residential Prohibited", cfUses: "Heavy Chemical Industrial Complexes" }
-};
+    <main class="container">
+        <!-- Manual Parameter Entry Form -->
+        <section class="card">
+            <h2>1. Select Property Query Path (Manual Entry parameters)</h2>
+            <p class="instruction">Configure all site zoning metrics, street frontages, and architectural profiles top-to-bottom:</p>
+            
+            <form id="zoningForm">
+                <div class="search-grid">
+                    <div>
+                        <label for="primaryDistrict"><strong>Primary Zoning District</strong></label>
+                        <select id="primaryDistrict">
+                            <option value="">-- Select District --</option>
+                            <optgroup label="Residential (R)">
+                                <option value="R1">R1</option><option value="R2">R2</option><option value="R3">R3</option>
+                                <option value="R4">R4</option><option value="R5">R5</option><option value="R6">R6</option>
+                                <option value="R6B">R6B</option><option value="R7">R7</option><option value="R7-1">R7-1</option>
+                                <option value="R7A">R7A</option><option value="R7X" selected>R7X</option><option value="R8">R8</option>
+                                <option value="R10">R10</option>
+                            </optgroup>
+                            <optgroup label="Commercial (C)">
+                                <option value="C1">C1 (C1-6 to C1-9)</option><option value="C2">C2 (C2-6 to C2-9)</option>
+                                <option value="C4">C4</option><option value="C4-6">C4-6</option><option value="C5">C5</option>
+                                <option value="C6">C6</option><option value="C7">C7</option><option value="C8">C8</option>
+                            </optgroup>
+                            <optgroup label="Manufacturing (M)">
+                                <option value="M1">M1</option><option value="M2">M2</option><option value="M3">M3</option>
+                            </optgroup>
+                        </select>
+                    </div>
 
-// 2. BACKUP ASSURANCE EVENT BINDING
-document.addEventListener("DOMContentLoaded", () => {
-  // Bind directly using tag name search if id property configuration fails
-  const retrieveButtons = document.querySelectorAll("button");
-  retrieveButtons.forEach(btn => {
-      if (btn.textContent.includes("RETRIEVE")) {
-          btn.addEventListener("click", calculateZoningMatrix);
-      }
-  });
+                    <div>
+                        <label for="pairedDistrict"><strong>Paired With</strong></label>
+                        <select id="pairedDistrict">
+                            <option value="None" selected>None</option>
+                            <optgroup label="Paired Manufacturing/Residential (ZR 123-11)">
+                                <option value="M1-1/R5">M1-1/R5</option><option value="M1-2/R6">M1-2/R6</option>
+                                <option value="M1-3/R7">M1-3/R7</option><option value="M1-4/R7A">M1-4/R7A</option>
+                                <option value="M1-5/R7X">M1-5/R7X</option><option value="M1-6/R10">M1-6/R10</option>
+                            </optgroup>
+                        </select>
+                    </div>
 
-  // Also catch standard direct binding fallback
-  const directBtn = document.getElementById("generateMatrixBtn");
-  if (directBtn) directBtn.addEventListener("click", calculateZoningMatrix);
-});
+                    <div>
+                        <label for="overlayDistrict"><strong>Overlay District</strong></label>
+                        <select id="overlayDistrict">
+                            <option value="None">None</option>
+                            <option value="C1-1">C1-1</option><option value="C1-2">C1-2</option><option value="C1-3">C1-3</option>
+                            <option value="C1-4">C1-4</option><option value="C1-5">C1-5</option><option value="C2-1">C2-1</option>
+                            <option value="C2-2">C2-2</option><option value="C2-3" selected>C2-3</option><option value="C2-4">C2-4</option>
+                            <option value="C2-5">C2-5</option>
+                        </select>
+                    </div>
 
-// 3. MAIN RUN ENGINE
-function calculateZoningMatrix() {
-  const primary = document.getElementById("primaryDistrict").value;
-  const paired = document.getElementById("pairedDistrict").value;
-  const overlay = document.getElementById("overlayDistrict").value;
-  const special = document.getElementById("specialDistrict").value;
-  const lotArea = parseFloat(document.getElementById("lotArea").value) || 0;
-  const lotType = document.getElementById("lotType").value;
-  const transitZone = document.getElementById("transitZone").value;
-  const streetscapeTier = document.getElementById("streetscapeTier").value;
-
-  if (!primary) {
-    alert("Please select a Primary Zoning District.");
-    return;
-  }
-
-  // Calculate standard limits
-  const baseRules = zoningRules[primary] || { stdFar: 1.0, uapFar: 1.0, resUses: "Allowed", cfUses: "Allowed" };
-  let finalStdFar = baseRules.stdFar;
-  let finalUapFar = baseRules.uapFar;
-
-  // Process Special District overrides if active
-  if (special && special !== "None") {
-    if (special.includes("Midtown")) { finalStdFar = 10.0; finalUapFar = 12.0; }
-    if (special.includes("Downtown Brooklyn")) { finalStdFar = 12.0; finalUapFar = 14.0; }
-  }
-
-  const stdMaxZfa = Math.round(lotArea * finalStdFar);
-  const uapMaxZfa = Math.round(lotArea * finalUapFar);
-
-  // Update calculations display parameters safely
-  safeSetText("lblStdFar", `${finalStdFar.toFixed(2)} FAR`);
-  safeSetText("lblStdMaxSf", `Base Capacity: ${stdMaxZfa.toLocaleString()} ZFA SF`);
-  safeSetText("lblUapFar", `${finalUapFar.toFixed(2)} FAR`);
-  safeSetText("lblUapMaxSf", `UAP Capacity: ${uapMaxZfa.toLocaleString()} ZFA SF`);
-
-  // Update side parameters dashboard profile
-  safeSetText("outZoning", `${primary} (Overlay: ${overlay})`);
-  safeSetText("outSpecial", paired !== "None" ? `${special} / Paired: ${paired}` : special);
-  safeSetText("outLotArea", `${lotArea.toLocaleString()} SF (${lotType})`);
-  safeSetText("outTransit", transitZone);
-  safeSetText("outStreetscape", streetscapeTier);
-  safeSetText("outFrontages", "Simplified Baseline Active");
-
-  // Format use tracks text
-  const trackRes = document.getElementById("trackRes").value;
-  const trackCf = document.getElementById("trackCf").value;
-  const trackComm = document.getElementById("trackComm").value;
-
-  safeSetHtml("resUseText", trackRes !== "None" ? `<b>Permitted:</b><br>${baseRules.resUses}` : "Inactive");
-  safeSetHtml("cfUseText", trackCf !== "None" ? `<b>Permitted:</b><br>${baseRules.cfUses}` : "Inactive");
-  
-  if (trackComm !== "None" && (overlay !== "None" || primary.startsWith("C"))) {
-    safeSetHtml("commUseText", "<b>Permitted:</b><br>Commercial operations valid via active secondary overlay configurations.");
-  } else {
-    safeSetHtml("commUseText", "<span style='color:red;'><b>🚫 Prohibited:</b><br>No commercial program tier active.</span>");
-  }
-
-  // Stamp current processing times
-  safeSetText("timestamp", "GENERATED: " + new Date().toLocaleString());
-
-  // Build rows array matrix items
-  compileSpreadsheetRows(primary, overlay, special, transitZone, finalStdFar, finalUapFar, stdMaxZfa, uapMaxZfa);
-
-  // Reveal matrix display board explicitly
-  const outputBox = document.getElementById("matrixOutputWrapper");
-  if (outputBox) {
-    outputBox.style.display = "block";
-    outputBox.scrollIntoView({ behavior: 'smooth' });
-  } else {
-    console.error("Output workspace container 'matrixOutputWrapper' was not found in index.html.");
-  }
-}
-
-// 4. MATRIX TABLE RENDER ROW COMPILER
-function compileSpreadsheetRows(primary, overlay, special, transitZone, stdFar, uapFar, stdSf, uapSf) {
-  const tbody = document.getElementById("tableBody");
-  if (!tbody) return;
-  tbody.innerHTML = "";
-
-  const hasCurbCut = document.getElementById("checkCurbCut")?.checked;
-  const hasDormers = document.getElementById("checkDormers")?.checked;
-  const hasInnerCourts = document.getElementById("checkInnerCourts")?.checked;
-  const hasOuterCourts = document.getElementById("checkOuterCourts")?.checked;
-  const hasYards = document.getElementById("checkYards")?.checked;
-  const hasParking = document.getElementById("checkParking")?.checked;
-  const hasUapUnits = document.getElementById("checkUapUnits")?.checked;
-  const hasMih = document.getElementById("checkMih")?.checked;
-
-  const rowsData = [
-    {
-      citation: "ZR 11-111 / 11-121",
-      title: "District Authority & Scope",
-      base: `Validates structural rules for target zone <b>${primary}</b>.`,
-      bonus: overlay !== "None" ? `Overlay <b>${overlay}</b> maps dynamic storefront properties.` : "No overlay active."
-    },
-    {
-      citation: "ZR 12-10",
-      title: "Regulatory Lexicon Definitions",
-      base: "Applies city-wide legal rules to overall site floor area calculations.",
-      bonus: "Balcony projection ratios evaluated against overall wall structures."
-    },
-    {
-      citation: "ZR 23-22 / 34-111",
-      title: "Floor Area Ratio Limitations",
-      base: `Baseline limits structural build profile to <b>${stdFar.toFixed(2)} FAR</b> (${stdSf.toLocaleString()} SF).`,
-      bonus: `UAP tracks expand envelope allowance up to <b>${uapFar.toFixed(2)} FAR</b> (${uapSf.toLocaleString()} SF).`
-    }
-  ];
-
-  if (hasYards) {
-    rowsData.push({
-      citation: "ZR 23-47 / 34-20",
-      title: "Rear Courtyard Open Space",
-      base: "Standard 30-foot open horizontal backyard buffer limits required along property boundaries.",
-      bonus: "Podium structures completely clear ground-floor commercial tracks from rear lines."
-    });
-  }
-
-  if (hasDormers) {
-    rowsData.push({
-      citation: "ZR 23-621",
-      title: "Permitted Obstructions Framework",
-      base: "Controls vertical base setbacks and sky exposure plane intersections above street walls.",
-      bonus: "Dormer setups restricted to max 60% of aggregate street wall linear widths."
-    });
-  }
-
+                    <div>
+                        <label for="specialDistrict"><strong>Special Purpose Districts</strong></label>
+                        <select id="specialDistrict">
+                            <option value="None" selected>None</option>
+                            <optgroup label="Manhattan">
