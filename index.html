@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NYC Custom Zoning Matrix Builder</title>
+    <title>NYC Zoning Analysis Cross-Reference Tool</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -15,140 +15,173 @@
     </header>
 
     <main class="container">
-        <!-- Input Form Section -->
+        <!-- 1. MANUAL ENTRY CONFIGURATOR PANEL -->
         <section class="card">
             <h2>1. Select Property Query Path (Manual Entry parameters)</h2>
-            <p>Configure all site zoning metrics, street frontages, and architectural profiles top-to-bottom:</p>
+            <p class="instruction">Configure all site zoning metrics, street frontages, and architectural profiles top-to-bottom:</p>
             
             <form id="zoningForm">
-                <!-- Dropdown Form Grid -->
-                <div class="search-grid" style="grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 15px; margin-top: 15px;">
-                    <div>
-                        <label for="primaryDistrict">Primary Zoning District</label>
-                        <select id="primaryDistrict">
-                            <option value="R1">R1</option><option value="R2">R2</option><option value="R3">R3</option>
-                            <option value="R4">R4</option><option value="R5">R5</option><option value="R6">R6</option>
-                            <option value="R6B">R6B</option><option value="R7">R7</option><option value="R7-1">R7-1</option>
-                            <option value="R7A">R7A</option><option value="R7X" selected>R7X</option><option value="R8">R8</option>
-                            <option value="R10">R10</option><option value="C4">C4</option><option value="C4-6">C4-6</option>
-                            <option value="M1">M1</option>
-                        </select>
-                    </div>
+                <!-- Core Zoning Selection Row -->
+                <div class="form-group">
+                    <label for="primaryDistrict">Primary Zoning District</label>
+                    <select id="primaryDistrict">
+                        <option value="R7X" selected>R7X</option>
+                        <option value="R1">R1</option><option value="R2">R2</option><option value="R3">R3</option>
+                        <option value="R4">R4</option><option value="R5">R5</option><option value="R6">R6</option>
+                        <option value="R6B">R6B</option><option value="R7">R7</option><option value="R7-1">R7-1</option>
+                        <option value="R7A">R7A</option><option value="R8">R8</option><option value="R10">R10</option>
+                        <option value="C4">C4</option><option value="C4-6">C4-6</option><option value="M1">M1</option>
+                    </select>
+                </div>
 
-                    <div>
-                        <label for="pairedDistrict">Paired With</label>
-                        <select id="pairedDistrict">
-                            <option value="None" selected>None</option>
-                            <option value="M1-1/R5">M1-1/R5</option><option value="M1-2/R6">M1-2/R6</option>
-                            <option value="M1-5/R7X">M1-5/R7X</option><option value="M1-6/R10">M1-6/R10</option>
-                        </select>
-                    </div>
+                <div class="form-group">
+                    <label for="pairedDistrict">Paired With</label>
+                    <select id="pairedDistrict">
+                        <option value="None" selected>None</option>
+                        <option value="M1-5/R7X">M1-5/R7X</option>
+                        <option value="M1-6/R10">M1-6/R10</option>
+                    </select>
+                </div>
 
-                    <div>
-                        <label for="overlayDistrict">Overlay District</label>
-                        <select id="overlayDistrict">
-                            <option value="None">None</option>
-                            <option value="C1-1">C1-1</option><option value="C1-2">C1-2</option>
-                            <option value="C1-3">C1-3</option><option value="C2-3" selected>C2-3</option>
-                            <option value="C2-4">C2-4</option>
-                        </select>
-                    </div>
+                <div class="form-group">
+                    <label for="overlayDistrict">Overlay District</label>
+                    <select id="overlayDistrict">
+                        <option value="C2-3" selected>C2-3</option>
+                        <option value="None">None</option>
+                        <option value="C1-3">C1-3</option><option value="C1-4">C1-4</option>
+                        <option value="C2-4">C2-4</option>
+                    </select>
+                </div>
 
-                    <div>
-                        <label for="specialDistrict">Special Districts</label>
-                        <select id="specialDistrict">
-                            <option value="None" selected>None</option>
-                            <option value="Special Midtown District (MiD)">Special Midtown District (MiD)</option>
-                            <option value="Special Downtown Brooklyn District (DB)">Special Downtown Brooklyn District (DB)</option>
-                            <option value="Special Long Island City Mixed Use District (LIC)">Special Long Island City Mixed Use District (LIC)</option>
-                            <option value="Special South Richmond Development District (SRD)">Special South Richmond Development District (SRD)</option>
-                        </select>
+                <div class="form-group">
+                    <label for="specialDistrict">Special Purpose Districts</label>
+                    <select id="specialDistrict">
+                        <option value="None" selected>None</option>
+                        <option value="Special Midtown District (MiD)">Special Midtown District (MiD)</option>
+                        <option value="Special Downtown Brooklyn District (DB)">Special Downtown Brooklyn District (DB)</option>
+                        <option value="Special Long Island City Mixed Use District (LIC)">Special Long Island City Mixed Use District (LIC)</option>
+                        <option value="Special South Richmond Development District (SRD)">Special South Richmond Development District (SRD)</option>
+                    </select>
+                </div>
+
+                <!-- Lot Geometry & Dimensions -->
+                <div class="form-group">
+                    <label for="lotArea">Lot Area (Square Footage Value)</label>
+                    <input type="number" id="lotArea" value="10180">
+                </div>
+
+                <div class="form-group">
+                    <label for="lotType">Lot Configuration Profile</label>
+                    <select id="lotType">
+                        <option value="Interior Lot" selected>Interior Lot</option>
+                        <option value="Corner Lot">Corner Lot</option>
+                        <option value="Through Lot">Through Lot</option>
+                        <option value="Mixed/Combination Lot">Mixed / Combination Lot</option>
+                    </select>
+                </div>
+
+                <!-- Program Track Matrices -->
+                <div class="form-group">
+                    <label for="trackRes">Residential Track</label>
+                    <select id="trackRes">
+                        <option value="Residential" selected>Residential (UG II)</option>
+                        <option value="None">None</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="trackCf">Community Facility Track</label>
+                    <select id="trackCf">
+                        <option value="None" selected>None</option>
+                        <option value="CommunityFacility">Community Facility (UG III-IV)</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="trackComm">Commercial Track</label>
+                    <select id="trackComm">
+                        <option value="Commercial" selected>Commercial (UG VI)</option>
+                        <option value="None">None</option>
+                    </select>
+                </div>
+
+                <!-- Global Overlays & Infrastructure Tiers -->
+                <div class="form-group">
+                    <label for="transitZone">Transit Zone Proximity Status</label>
+                    <select id="transitZone">
+                        <option value="Within Inner Transit Zone" selected>Within Inner Transit Zone (Parking Exemption Active)</option>
+                        <option value="Outside Transit Zone">Outside Transit Zone (Standard Parking Ratios)</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="streetscapeTier">Streetscape Tier Classification</label>
+                    <select id="streetscapeTier">
+                        <option value="Tier 1" selected>Tier 1 Streetscape Standard</option>
+                        <option value="Tier 2">Tier 2 Enhanced Contextual</option>
+                        <option value="Tier 3">Tier 3 Special Pedestrian Hub</option>
+                    </select>
+                </div>
+
+                <!-- Balcony Analysis Configuration (Requested Options) -->
+                <div class="form-group">
+                    <label for="hasBalconies">Are Projections / Balconies Provided?</label>
+                    <select id="hasBalconies">
+                        <option value="No" selected>No Balconies Provided</option>
+                        <option value="Yes">Yes, Projections Appended</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="balconyWallCount">How Many Wall Faces Have Balconies?</label>
+                    <input type="number" id="balconyWallCount" value="1" min="1">
+                </div>
+
+                <div class="form-group">
+                    <label for="totalWallWidth">Total Combined Width of All Balcony Walls (ft)</label>
+                    <input type="number" id="totalWallWidth" value="60">
+                </div>
+
+                <div class="form-group">
+                    <label for="providedBalconyWidth">Total Width of Provided Balconies (ft)</label>
+                    <input type="number" id="providedBalconyWidth" value="20">
+                </div>
+
+                <!-- Binary Parameters Checklist Grid -->
+                <div class="checklist-card">
+                    <strong class="checklist-title">Appended Architectural Parameters Checklist</strong>
+                    <div class="checklist-grid">
+                        <label><input type="checkbox" id="checkCurbCut"> Curb Cut Provided</label>
+                        <label><input type="checkbox" id="checkDormers"> Dormer System Present</label>
+                        <label><input type="checkbox" id="checkInnerCourts"> Inner Court System</label>
+                        <label><input type="checkbox" id="checkOuterCourts"> Outer Court System</label>
+                        <label><input type="checkbox" id="checkYards" checked> Perimeter Open Yards</label>
+                        <label><input type="checkbox" id="checkParking" checked> Accessory Parking</label>
+                        <label><input type="checkbox" id="checkUapUnits" checked> UAP Affordable Housing</label>
+                        <label><input type="checkbox" id="checkMih"> MIH Designated Zone</label>
                     </div>
                 </div>
 
-                <!-- Lot Geometry Profile Row -->
-                <div class="search-grid" style="grid-template-columns: 2fr 1fr; gap: 15px; margin-top: 15px;">
-                    <div>
-                        <label for="lotArea">Lot Area (Square Footage Value)</label>
-                        <input type="number" id="lotArea" value="10180">
-                    </div>
-                    <div>
-                        <label for="lotType">Lot Configuration Profile</label>
-                        <select id="lotType">
-                            <option value="Corner Lot">Corner Lot</option>
-                            <option value="Interior Lot" selected>Interior Lot</option>
-                            <option value="Through Lot">Through Lot</option>
-                            <option value="Mixed/Combination Lot">Mixed / Combination Lot</option>
-                        </select>
-                    </div>
-                </div>
+                <!-- THE RETRIEVE BUTTON -->
+                <button type="button" id="retrieveBtn">RETRIEVE COMPLIANCE MATRIX</button>
+            </form>
+        </section>
 
-                <!-- Mixed Use Tracks -->
-                <div class="search-grid" style="grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-top: 15px;">
-                    <div>
-                        <label for="trackRes">Residential Track</label>
-                        <select id="trackRes">
-                            <option value="None">None</option>
-                            <option value="Residential" selected>Residential (UG II)</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label for="trackCf">Community Facility Track</label>
-                        <select id="trackCf">
-                            <option value="None" selected>None</option>
-                            <option value="CommunityFacility">Community Facility</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label for="trackComm">Commercial Track</label>
-                        <select id="trackComm">
-                            <option value="None">None</option>
-                            <option value="Commercial" selected>Commercial (UG VI)</option>
-                        </select>
-                    </div>
-                </div>
+        <!-- 2. STABLE OUTPUT COMPLIANCE MATRIX COMPONENT -->
+        <section id="matrixOutputWrapper" style="display: none; margin-top: 30px;">
+            <div class="matrix-header">
+                <h2>ZONING COMPLIANCE REPORT EXCEL-SHEET</h2>
+                <span id="timestamp"></span>
+            </div>
 
-                <!-- Transit Infrastructure & Streetscape Rows -->
-                <div class="search-grid" style="grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 15px;">
-                    <div>
-                        <label for="transitZone">Transit Zone Proximity Status</label>
-                        <select id="transitZone">
-                            <option value="Outside Transit Zone">Outside Transit Zone</option>
-                            <option value="Within Inner Transit Zone" selected>Within Inner Transit Zone (Parking Exemption Active)</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label for="streetscapeTier">Streetscape Tier Classification</label>
-                        <select id="streetscapeTier">
-                            <option value="Tier 1" selected>Tier 1 Streetscape Standard</option>
-                            <option value="Tier 2">Tier 2 Enhanced Contextual</option>
-                            <option value="Tier 3">Tier 3 Special Pedestrian Hub</option>
-                        </select>
-                    </div>
-                </div>
-
-                <!-- Street Frontages Controls Matrix Section -->
-                <div class="card" style="margin-top: 20px; background: #fafafa; border: 1px solid var(--border-color);">
-                    <strong style="color: var(--primary-color); text-transform: uppercase; font-size: 0.85rem; display: block; margin-bottom: 10px;">2. Frontages & Street Data Configurations</strong>
-                    <div class="search-grid" style="grid-template-columns: 1fr 1fr; gap: 15px;">
-                        <div>
-                            <label for="frontageCount">Number of Active Street Frontages</label>
-                            <select id="frontageCount">
-                                <option value="1" selected>1 Frontage</option>
-                                <option value="2">2 Frontages</option>
-                                <option value="3">3 Frontages</option>
-                            </select>
+            <!-- Side-by-Side Blueprint Grid Summary -->
+            <div class="split-layout">
+                <!-- Left Main Capacity Blocks & Tables Matrix -->
+                <div class="main-column">
+                    <div class="metrics-grid">
+                        <div class="metric-box box-blue">
+                            <div class="metric-label">Standard Baseline FAR</div>
+                            <div class="metric-val" id="lblStdFar">-</div>
+                            <div id="lblStdMaxSf" class="metric-sf">-</div>
                         </div>
-                    </div>
-                    <!-- Hardcoded Explicit Frontage Fields to Prevent Script Breaks -->
-                    <div id="frontageFieldsWrapper" style="margin-top: 10px;">
-                        <div class="search-grid" id="frontageRow1" style="grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 10px;">
-                            <div><label><small>Frontage #1 Type</small></label><select id="frontageType1"><option value="Wide">Wide Street (≥ 75 ft)</option><option value="Narrow">Narrow Street (< 75 ft)</option></select></div>
-                            <div><label><small>Frontage #1 Length (ft)</small></label><input type="number" id="frontageLen1" value="100"></div>
-                        </div>
-                        <div class="search-grid" id="frontageRow2" style="grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 10px; display: none;">
-                            <div><label><small>Frontage #2 Type</small></label><select id="frontageType2"><option value="Wide">Wide Street (≥ 75 ft)</option><option value="Narrow" selected>Narrow Street (< 75 ft)</option></select></div>
-                            <div><label><small>Frontage #2 Length (ft)</small></label><input type="number" id="frontageLen2" value="75"></div>
-                        </div>
-                        <div class="search-grid" id="frontageRow3" style="grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 10px; display: none;">
-                            <div><label><small>Frontage #3 Type</small></label><select id="frontageType3"><option value="Wide">Wide Street (≥ 75 ft)</option><option value="Narrow">Narrow Street (< 75 ft)</option></select></div>
+                        <div class="metric-box box-teal">
