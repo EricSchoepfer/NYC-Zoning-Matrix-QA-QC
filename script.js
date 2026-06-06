@@ -1,3 +1,8 @@
+// ==========================================================================
+// NYC Custom Zoning Matrix Builder - Core Logic Engine (script.js)
+// ==========================================================================
+
+// 1. COMPREHENSIVE LAND USE FAR & LOOKUP DICTIONARY
 const zoningRules = {
   "R1":   { stdFar: 0.50, uapFar: 0.50, resUses: "Single-Family Detached Homes", cfUses: "Basic Community Facilities" },
   "R2":   { stdFar: 0.50, uapFar: 0.50, resUses: "Single-Family Detached Homes", cfUses: "Basic Community Facilities" },
@@ -25,7 +30,165 @@ const zoningRules = {
   "M3":   { stdFar: 3.00, uapFar: 3.00, resUses: "🚫 Standalone Residential Prohibited", cfUses: "Heavy Chemical Industrial Complexes" }
 };
 
+// 2. DOM EVENT LIFECYCLE LISTENERS
 document.addEventListener("DOMContentLoaded", () => {
+  // Bind Form Setup Adjusters
   document.getElementById("frontageCount").addEventListener("change", renderFrontageInputs);
   document.getElementById("hasBalconies").addEventListener("change", toggleBalconyFields);
-  document.getElementById("balconyWallCount").addEventListener("change
+  document.getElementById("balconyWallCount").addEventListener("change", renderBalconyWallInputs);
+  document.getElementById("retrieveBtn").addEventListener("click", calculateZoningMatrix);
+
+  // Initial Runtime Setup
+  renderFrontageInputs();
+  toggleBalconyFields();
+});
+
+// 3. DYNAMIC INTERACTIVE GENERATOR: STREET FRONTAGES
+function renderFrontageInputs() {
+  const count = parseInt(document.getElementById("frontageCount").value) || 1;
+  const container = document.getElementById("frontageInputsContainer");
+  container.innerHTML = "";
+
+  for (let i = 1; i <= count; i++) {
+    const div = document.createElement("div");
+    div.className = "frontage-row";
+    div.style.display = "grid";
+    div.style.gridTemplateColumns = "repeat(auto-fit, minmax(180px, 1fr))";
+    div.style.gap = "15px";
+    div.style.marginTop = "10px";
+    div.style.padding = "10px";
+    div.style.background = "#f9fafb";
+    div.style.border = "1px solid var(--border-color)";
+    div.style.borderRadius = "4px";
+
+    div.innerHTML = `
+      <div>
+        <label style="font-size:0.75rem;"><small>Frontage #${i} Type</small></label>
+        <select class="frontage-type" style="margin-top:4px;">
+          <option value="Wide">Wide Street (⚖️ Width ≥ 75 ft)</option>
+          <option value="Narrow">Narrow Street (⚖️ Width < 75 ft)</option>
+        </select>
+      </div>
+      <div>
+        <label style="font-size:0.75rem;"><small>Street Line Length (Linear Feet)</small></label>
+        <input type="number" class="frontage-length" value="100" min="0" style="margin-top:4px;">
+      </div>
+    `;
+    container.appendChild(div);
+  }
+}
+
+// 4. DYNAMIC INTERACTIVE GENERATOR: BALCONIES
+function toggleBalconyFields() {
+  const hasBalconies = document.getElementById("hasBalconies").value === "Yes";
+  const container = document.getElementById("balconyLogicContainer");
+  
+  if (hasBalconies) {
+    container.style.display = "block";
+    renderBalconyWallInputs();
+  } else {
+    container.style.display = "none";
+  }
+}
+
+function renderBalconyWallInputs() {
+  const count = parseInt(document.getElementById("balconyWallCount").value) || 1;
+  const container = document.getElementById("balconyWallsContainer");
+  container.innerHTML = "";
+
+  for (let i = 1; i <= count; i++) {
+    const div = document.createElement("div");
+    div.className = "balcony-row";
+    div.style.display = "grid";
+    div.style.gridTemplateColumns = "repeat(auto-fit, minmax(180px, 1fr))";
+    div.style.gap = "15px";
+    div.style.marginTop = "10px";
+    div.style.padding = "8px";
+    div.style.borderBottom = "1px dashed var(--border-color)";
+
+    div.innerHTML = `
+      <div>
+        <label style="font-size:0.75rem;"><small>Wall Face #${i} Total Width (ft)</small></label>
+        <input type="number" class="balcony-wall-total" value="60" min="1" style="margin-top:4px;">
+      </div>
+      <div>
+        <label style="font-size:0.75rem;"><small>Provided Balcony Width (ft)</small></label>
+        <input type="number" class="balcony-width" value="20" min="0" style="margin-top:4px;">
+      </div>
+    `;
+    container.appendChild(div);
+  }
+}
+
+// 5. MASTER RETRIEVAL CALCULATION MODULE
+function calculateZoningMatrix() {
+  // Capture Inputs
+  const primary = document.getElementById("primaryDistrict").value;
+  const paired = document.getElementById("pairedDistrict").value;
+  const overlay = document.getElementById("overlayDistrict").value;
+  const special = document.getElementById("specialDistrict").value;
+  const lotArea = parseFloat(document.getElementById("lotArea").value) || 0;
+  const lotType = document.getElementById("lotType").value;
+  const transitZone = document.getElementById("transitZone").value;
+  const streetscapeTier = document.getElementById("streetscapeTier").value;
+
+  if (!primary) {
+    alert("Please assign a Primary target zoning district to execute calculation runs.");
+    return;
+  }
+
+  // Stamp Output Execution
+  document.getElementById("timestamp").innerText = "RETRIEVED: " + new Date().toLocaleString();
+
+  // Load Base Multipliers
+  const baseRules = zoningRules[primary] || { stdFar: 1.0, uapFar: 1.0, resUses: "Standard Allowances", cfUses: "Standard Facilities" };
+  
+  let finalStdFar = baseRules.stdFar;
+  let finalUapFar = baseRules.uapFar;
+
+  // Handle Special Paired District Override Multipliers (ZR 123-11)
+  if (paired !== "None") {
+    const pairedParts = paired.split("/");
+    if (pairedParts.length === 2 && zoningRules[pairedParts[1]]) {
+      finalStdFar = zoningRules[pairedParts[1]].stdFar;
+      finalUapFar = zoningRules[pairedParts[1]].uapFar;
+    }
+  }
+
+  // Handle High Bulk Special District Multipliers
+  if (special.includes("Midtown")) {
+    finalStdFar = Math.max(finalStdFar, 10.0);
+    finalUapFar = Math.max(finalUapFar, 12.0);
+  } else if (special.includes("Downtown Brooklyn")) {
+    finalStdFar = Math.max(finalStdFar, 12.0);
+    finalUapFar = Math.max(finalUapFar, 14.0);
+  }
+
+  // Calculate Square Footage Limits
+  const stdMaxZfa = Math.round(lotArea * finalStdFar);
+  const uapMaxZfa = Math.round(lotArea * finalUapFar);
+
+  // Process Linear Street Frontages
+  let totalFrontageLength = 0;
+  let wideCount = 0;
+  let narrowCount = 0;
+  
+  const typeSelects = document.querySelectorAll(".frontage-type");
+  const lengthInputs = document.querySelectorAll(".frontage-length");
+
+  typeSelects.forEach((select, index) => {
+    const len = parseFloat(lengthInputs[index].value) || 0;
+    totalFrontageLength += len;
+    if (select.value === "Wide") wideCount++;
+    else narrowCount++;
+  });
+
+  // Calculate Balcony Projection Coverage Ratios
+  let balconySummary = "No Balconies Provided";
+  if (document.getElementById("hasBalconies").value === "Yes") {
+    let totalWallWidth = 0;
+    let totalBalconyWidth = 0;
+    document.querySelectorAll(".balcony-wall-total").forEach(input => totalWallWidth += parseFloat(input.value) || 0);
+    document.querySelectorAll(".balcony-width").forEach(input => totalBalconyWidth += parseFloat(input.value) || 0);
+    
+    const ratio = totalWallWidth > 0 ? ((totalBalconyWidth / totalWallWidth) * 100).toFixed(1) : 0;
