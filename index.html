@@ -1,187 +1,174 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NYC Zoning Analysis Cross-Reference Tool</title>
-    <link rel="stylesheet" href="style.css">
-</head>
-<body>
-    <header>
-        <div class="header-container">
-            <h1>NYC Zoning Cross-Reference App</h1>
-            <p class="subtitle">Dual Search Engine: Sandbox Address & Tax Lot Calculator</p>
-        </div>
-    </header>
+// ==========================================================================
+// NYC Custom Zoning Matrix Builder - Core Fixed Logic Engine (script.js)
+// ==========================================================================
 
-    <main class="container">
-        <!-- 1. MANUAL ENTRY CONFIGURATOR PANEL -->
-        <section class="card">
-            <h2>1. Select Property Query Path (Manual Entry parameters)</h2>
-            <p class="instruction">Configure all site zoning metrics, street frontages, and architectural profiles top-to-bottom:</p>
-            
-            <form id="zoningForm">
-                <!-- Core Zoning Selection Row -->
-                <div class="form-group">
-                    <label for="primaryDistrict">Primary Zoning District</label>
-                    <select id="primaryDistrict">
-                        <option value="R7X" selected>R7X</option>
-                        <option value="R1">R1</option><option value="R2">R2</option><option value="R3">R3</option>
-                        <option value="R4">R4</option><option value="R5">R5</option><option value="R6">R6</option>
-                        <option value="R6B">R6B</option><option value="R7">R7</option><option value="R7-1">R7-1</option>
-                        <option value="R7A">R7A</option><option value="R8">R8</option><option value="R10">R10</option>
-                        <option value="C4">C4</option><option value="C4-6">C4-6</option><option value="M1">M1</option>
-                    </select>
-                </div>
+const zoningRules = {
+  "R1":   { stdFar: 0.50, uapFar: 0.50, resUses: "Single-Family Detached Homes", cfUses: "Basic Community Facilities" },
+  "R2":   { stdFar: 0.50, uapFar: 0.50, resUses: "Single-Family Detached Homes", cfUses: "Basic Community Facilities" },
+  "R3":   { stdFar: 0.50, uapFar: 0.60, resUses: "Low-Rise Contextual Multifamily", cfUses: "Ambulatory, Houses of Worship" },
+  "R4":   { stdFar: 0.75, uapFar: 0.90, resUses: "Detached/Semi-Detached Rowhouses", cfUses: "Local Schools, Houses of Worship" },
+  "R5":   { stdFar: 1.25, uapFar: 1.65, resUses: "Single/Two-Family Attached Units", cfUses: "Medical Offices, Community Hubs" },
+  "R6":   { stdFar: 2.20, uapFar: 3.60, resUses: "Medium-Density Residential Complexes", cfUses: "Hospitals, Libraries, Schools" },
+  "R6B":  { stdFar: 2.00, uapFar: 2.20, resUses: "Traditional Contextual Townhouses", cfUses: "Neighborhood Local Assets" },
+  "R7":   { stdFar: 3.44, uapFar: 4.60, resUses: "Medium-High Density Apartment Frames", cfUses: "Healthcare, Large Service Buildings" },
+  "R7-1": { stdFar: 3.44, uapFar: 4.60, resUses: "Height Factor / Quality Housing Track", cfUses: "Ambulatory Care, Educational Facilities" },
+  "R7A":  { stdFar: 4.00, uapFar: 4.60, resUses: "High-Density Quality Housing Assets", cfUses: "Hospitals, Non-Profit Institutions" },
+  "R7X":  { stdFar: 5.00, uapFar: 6.00, resUses: "High-Bulk Contextual Multi-Family Envelopes", cfUses: "Medical Research, Public Libraries" },
+  "R8":   { stdFar: 6.02, uapFar: 7.20, resUses: "High-Density Core Urban Apartments", cfUses: "Hospitals, Academic Complexes" },
+  "R10":  { stdFar: 10.00, uapFar: 12.00, resUses: "Maximum Density High-Rise Housing Towers", cfUses: "Full Research Hospitals, Libraries" },
+  "C1":   { stdFar: 2.00, uapFar: 2.40, resUses: "Commercial Hub Mixed Residential", cfUses: "Local Neighborhood Retail Outlets" },
+  "C2":   { stdFar: 2.00, uapFar: 2.40, resUses: "Commercial District Retail Layouts", cfUses: "Service Stations, Business Offices" },
+  "C4":   { stdFar: 3.40, uapFar: 4.00, resUses: "Mixed-Use Commercial Office Footprints", cfUses: "Regional Malls, Training Centers" },
+  "C4-6": { stdFar: 10.00, uapFar: 12.00, resUses: "High-Bulk Central Business Core Buildings", cfUses: "Commercial Skyscrapers, Health Towers" },
+  "C5":   { stdFar: 10.00, uapFar: 12.00, resUses: "Central Commercial Skyscraper Profiles", cfUses: "Corporate Headquarters, Retail Hubs" },
+  "C6":   { stdFar: 10.00, uapFar: 12.00, resUses: "High-Bulk Commercial Entertainment Zones", cfUses: "Theaters, Corporate Business Hubs" },
+  "C7":   { stdFar: 2.00, uapFar: 2.00, resUses: "Amusement Parks & Large Recreation Units", cfUses: "Open Air Entertainment, Arenas" },
+  "C8":   { stdFar: 1.00, uapFar: 1.00, resUses: "🚫 Standalone Residential Prohibited", cfUses: "Automotive Repair, Heavy Showrooms" },
+  "M1":   { stdFar: 1.00, uapFar: 1.00, resUses: "🚫 Standalone Residential Prohibited", cfUses: "Light Industrial Performance Envelopes" },
+  "M2":   { stdFar: 2.00, uapFar: 2.00, resUses: "🚫 Standalone Residential Prohibited", cfUses: "Medium Manufacturing Storage Yards" },
+  "M3":   { stdFar: 3.00, uapFar: 3.00, resUses: "🚫 Standalone Residential Prohibited", cfUses: "Heavy Chemical Industrial Complexes" }
+};
 
-                <div class="form-group">
-                    <label for="pairedDistrict">Paired With</label>
-                    <select id="pairedDistrict">
-                        <option value="None" selected>None</option>
-                        <option value="M1-5/R7X">M1-5/R7X</option>
-                        <option value="M1-6/R10">M1-6/R10</option>
-                    </select>
-                </div>
+// 2. BACKUP ASSURANCE EVENT BINDING
+document.addEventListener("DOMContentLoaded", () => {
+  // Bind directly using tag name search if id property configuration fails
+  const retrieveButtons = document.querySelectorAll("button");
+  retrieveButtons.forEach(btn => {
+      if (btn.textContent.includes("RETRIEVE")) {
+          btn.addEventListener("click", calculateZoningMatrix);
+      }
+  });
 
-                <div class="form-group">
-                    <label for="overlayDistrict">Overlay District</label>
-                    <select id="overlayDistrict">
-                        <option value="C2-3" selected>C2-3</option>
-                        <option value="None">None</option>
-                        <option value="C1-3">C1-3</option><option value="C1-4">C1-4</option>
-                        <option value="C2-4">C2-4</option>
-                    </select>
-                </div>
+  // Also catch standard direct binding fallback
+  const directBtn = document.getElementById("generateMatrixBtn");
+  if (directBtn) directBtn.addEventListener("click", calculateZoningMatrix);
+});
 
-                <div class="form-group">
-                    <label for="specialDistrict">Special Purpose Districts</label>
-                    <select id="specialDistrict">
-                        <option value="None" selected>None</option>
-                        <option value="Special Midtown District (MiD)">Special Midtown District (MiD)</option>
-                        <option value="Special Downtown Brooklyn District (DB)">Special Downtown Brooklyn District (DB)</option>
-                        <option value="Special Long Island City Mixed Use District (LIC)">Special Long Island City Mixed Use District (LIC)</option>
-                        <option value="Special South Richmond Development District (SRD)">Special South Richmond Development District (SRD)</option>
-                    </select>
-                </div>
+// 3. MAIN RUN ENGINE
+function calculateZoningMatrix() {
+  const primary = document.getElementById("primaryDistrict").value;
+  const paired = document.getElementById("pairedDistrict").value;
+  const overlay = document.getElementById("overlayDistrict").value;
+  const special = document.getElementById("specialDistrict").value;
+  const lotArea = parseFloat(document.getElementById("lotArea").value) || 0;
+  const lotType = document.getElementById("lotType").value;
+  const transitZone = document.getElementById("transitZone").value;
+  const streetscapeTier = document.getElementById("streetscapeTier").value;
 
-                <!-- Lot Geometry & Dimensions -->
-                <div class="form-group">
-                    <label for="lotArea">Lot Area (Square Footage Value)</label>
-                    <input type="number" id="lotArea" value="10180">
-                </div>
+  if (!primary) {
+    alert("Please select a Primary Zoning District.");
+    return;
+  }
 
-                <div class="form-group">
-                    <label for="lotType">Lot Configuration Profile</label>
-                    <select id="lotType">
-                        <option value="Interior Lot" selected>Interior Lot</option>
-                        <option value="Corner Lot">Corner Lot</option>
-                        <option value="Through Lot">Through Lot</option>
-                        <option value="Mixed/Combination Lot">Mixed / Combination Lot</option>
-                    </select>
-                </div>
+  // Calculate standard limits
+  const baseRules = zoningRules[primary] || { stdFar: 1.0, uapFar: 1.0, resUses: "Allowed", cfUses: "Allowed" };
+  let finalStdFar = baseRules.stdFar;
+  let finalUapFar = baseRules.uapFar;
 
-                <!-- Program Track Matrices -->
-                <div class="form-group">
-                    <label for="trackRes">Residential Track</label>
-                    <select id="trackRes">
-                        <option value="Residential" selected>Residential (UG II)</option>
-                        <option value="None">None</option>
-                    </select>
-                </div>
+  // Process Special District overrides if active
+  if (special && special !== "None") {
+    if (special.includes("Midtown")) { finalStdFar = 10.0; finalUapFar = 12.0; }
+    if (special.includes("Downtown Brooklyn")) { finalStdFar = 12.0; finalUapFar = 14.0; }
+  }
 
-                <div class="form-group">
-                    <label for="trackCf">Community Facility Track</label>
-                    <select id="trackCf">
-                        <option value="None" selected>None</option>
-                        <option value="CommunityFacility">Community Facility (UG III-IV)</option>
-                    </select>
-                </div>
+  const stdMaxZfa = Math.round(lotArea * finalStdFar);
+  const uapMaxZfa = Math.round(lotArea * finalUapFar);
 
-                <div class="form-group">
-                    <label for="trackComm">Commercial Track</label>
-                    <select id="trackComm">
-                        <option value="Commercial" selected>Commercial (UG VI)</option>
-                        <option value="None">None</option>
-                    </select>
-                </div>
+  // Update calculations display parameters safely
+  safeSetText("lblStdFar", `${finalStdFar.toFixed(2)} FAR`);
+  safeSetText("lblStdMaxSf", `Base Capacity: ${stdMaxZfa.toLocaleString()} ZFA SF`);
+  safeSetText("lblUapFar", `${finalUapFar.toFixed(2)} FAR`);
+  safeSetText("lblUapMaxSf", `UAP Capacity: ${uapMaxZfa.toLocaleString()} ZFA SF`);
 
-                <!-- Global Overlays & Infrastructure Tiers -->
-                <div class="form-group">
-                    <label for="transitZone">Transit Zone Proximity Status</label>
-                    <select id="transitZone">
-                        <option value="Within Inner Transit Zone" selected>Within Inner Transit Zone (Parking Exemption Active)</option>
-                        <option value="Outside Transit Zone">Outside Transit Zone (Standard Parking Ratios)</option>
-                    </select>
-                </div>
+  // Update side parameters dashboard profile
+  safeSetText("outZoning", `${primary} (Overlay: ${overlay})`);
+  safeSetText("outSpecial", paired !== "None" ? `${special} / Paired: ${paired}` : special);
+  safeSetText("outLotArea", `${lotArea.toLocaleString()} SF (${lotType})`);
+  safeSetText("outTransit", transitZone);
+  safeSetText("outStreetscape", streetscapeTier);
+  safeSetText("outFrontages", "Simplified Baseline Active");
 
-                <div class="form-group">
-                    <label for="streetscapeTier">Streetscape Tier Classification</label>
-                    <select id="streetscapeTier">
-                        <option value="Tier 1" selected>Tier 1 Streetscape Standard</option>
-                        <option value="Tier 2">Tier 2 Enhanced Contextual</option>
-                        <option value="Tier 3">Tier 3 Special Pedestrian Hub</option>
-                    </select>
-                </div>
+  // Format use tracks text
+  const trackRes = document.getElementById("trackRes").value;
+  const trackCf = document.getElementById("trackCf").value;
+  const trackComm = document.getElementById("trackComm").value;
 
-                <!-- Balcony Analysis Configuration (Requested Options) -->
-                <div class="form-group">
-                    <label for="hasBalconies">Are Projections / Balconies Provided?</label>
-                    <select id="hasBalconies">
-                        <option value="No" selected>No Balconies Provided</option>
-                        <option value="Yes">Yes, Projections Appended</option>
-                    </select>
-                </div>
+  safeSetHtml("resUseText", trackRes !== "None" ? `<b>Permitted:</b><br>${baseRules.resUses}` : "Inactive");
+  safeSetHtml("cfUseText", trackCf !== "None" ? `<b>Permitted:</b><br>${baseRules.cfUses}` : "Inactive");
+  
+  if (trackComm !== "None" && (overlay !== "None" || primary.startsWith("C"))) {
+    safeSetHtml("commUseText", "<b>Permitted:</b><br>Commercial operations valid via active secondary overlay configurations.");
+  } else {
+    safeSetHtml("commUseText", "<span style='color:red;'><b>🚫 Prohibited:</b><br>No commercial program tier active.</span>");
+  }
 
-                <div class="form-group">
-                    <label for="balconyWallCount">How Many Wall Faces Have Balconies?</label>
-                    <input type="number" id="balconyWallCount" value="1" min="1">
-                </div>
+  // Stamp current processing times
+  safeSetText("timestamp", "GENERATED: " + new Date().toLocaleString());
 
-                <div class="form-group">
-                    <label for="totalWallWidth">Total Combined Width of All Balcony Walls (ft)</label>
-                    <input type="number" id="totalWallWidth" value="60">
-                </div>
+  // Build rows array matrix items
+  compileSpreadsheetRows(primary, overlay, special, transitZone, finalStdFar, finalUapFar, stdMaxZfa, uapMaxZfa);
 
-                <div class="form-group">
-                    <label for="providedBalconyWidth">Total Width of Provided Balconies (ft)</label>
-                    <input type="number" id="providedBalconyWidth" value="20">
-                </div>
+  // Reveal matrix display board explicitly
+  const outputBox = document.getElementById("matrixOutputWrapper");
+  if (outputBox) {
+    outputBox.style.display = "block";
+    outputBox.scrollIntoView({ behavior: 'smooth' });
+  } else {
+    console.error("Output workspace container 'matrixOutputWrapper' was not found in index.html.");
+  }
+}
 
-                <!-- Binary Parameters Checklist Grid -->
-                <div class="checklist-card">
-                    <strong class="checklist-title">Appended Architectural Parameters Checklist</strong>
-                    <div class="checklist-grid">
-                        <label><input type="checkbox" id="checkCurbCut"> Curb Cut Provided</label>
-                        <label><input type="checkbox" id="checkDormers"> Dormer System Present</label>
-                        <label><input type="checkbox" id="checkInnerCourts"> Inner Court System</label>
-                        <label><input type="checkbox" id="checkOuterCourts"> Outer Court System</label>
-                        <label><input type="checkbox" id="checkYards" checked> Perimeter Open Yards</label>
-                        <label><input type="checkbox" id="checkParking" checked> Accessory Parking</label>
-                        <label><input type="checkbox" id="checkUapUnits" checked> UAP Affordable Housing</label>
-                        <label><input type="checkbox" id="checkMih"> MIH Designated Zone</label>
-                    </div>
-                </div>
+// 4. MATRIX TABLE RENDER ROW COMPILER
+function compileSpreadsheetRows(primary, overlay, special, transitZone, stdFar, uapFar, stdSf, uapSf) {
+  const tbody = document.getElementById("tableBody");
+  if (!tbody) return;
+  tbody.innerHTML = "";
 
-                <!-- THE RETRIEVE BUTTON -->
-                <button type="button" id="retrieveBtn">RETRIEVE COMPLIANCE MATRIX</button>
-            </form>
-        </section>
+  const hasCurbCut = document.getElementById("checkCurbCut")?.checked;
+  const hasDormers = document.getElementById("checkDormers")?.checked;
+  const hasInnerCourts = document.getElementById("checkInnerCourts")?.checked;
+  const hasOuterCourts = document.getElementById("checkOuterCourts")?.checked;
+  const hasYards = document.getElementById("checkYards")?.checked;
+  const hasParking = document.getElementById("checkParking")?.checked;
+  const hasUapUnits = document.getElementById("checkUapUnits")?.checked;
+  const hasMih = document.getElementById("checkMih")?.checked;
 
-        <!-- 2. STABLE OUTPUT COMPLIANCE MATRIX COMPONENT -->
-        <section id="matrixOutputWrapper" style="display: none; margin-top: 30px;">
-            <div class="matrix-header">
-                <h2>ZONING COMPLIANCE REPORT EXCEL-SHEET</h2>
-                <span id="timestamp"></span>
-            </div>
+  const rowsData = [
+    {
+      citation: "ZR 11-111 / 11-121",
+      title: "District Authority & Scope",
+      base: `Validates structural rules for target zone <b>${primary}</b>.`,
+      bonus: overlay !== "None" ? `Overlay <b>${overlay}</b> maps dynamic storefront properties.` : "No overlay active."
+    },
+    {
+      citation: "ZR 12-10",
+      title: "Regulatory Lexicon Definitions",
+      base: "Applies city-wide legal rules to overall site floor area calculations.",
+      bonus: "Balcony projection ratios evaluated against overall wall structures."
+    },
+    {
+      citation: "ZR 23-22 / 34-111",
+      title: "Floor Area Ratio Limitations",
+      base: `Baseline limits structural build profile to <b>${stdFar.toFixed(2)} FAR</b> (${stdSf.toLocaleString()} SF).`,
+      bonus: `UAP tracks expand envelope allowance up to <b>${uapFar.toFixed(2)} FAR</b> (${uapSf.toLocaleString()} SF).`
+    }
+  ];
 
-            <!-- Side-by-Side Blueprint Grid Summary -->
-            <div class="split-layout">
-                <!-- Left Main Capacity Blocks & Tables Matrix -->
-                <div class="main-column">
-                    <div class="metrics-grid">
-                        <div class="metric-box box-blue">
-                            <div class="metric-label">Standard Baseline FAR</div>
-                            <div class="metric-val" id="lblStdFar">-</div>
-                            <div id="lblStdMaxSf" class="metric-sf">-</div>
-                        </div>
-                        <div class="metric-box box-teal">
+  if (hasYards) {
+    rowsData.push({
+      citation: "ZR 23-47 / 34-20",
+      title: "Rear Courtyard Open Space",
+      base: "Standard 30-foot open horizontal backyard buffer limits required along property boundaries.",
+      bonus: "Podium structures completely clear ground-floor commercial tracks from rear lines."
+    });
+  }
+
+  if (hasDormers) {
+    rowsData.push({
+      citation: "ZR 23-621",
+      title: "Permitted Obstructions Framework",
+      base: "Controls vertical base setbacks and sky exposure plane intersections above street walls.",
+      bonus: "Dormer setups restricted to max 60% of aggregate street wall linear widths."
+    });
+  }
+
