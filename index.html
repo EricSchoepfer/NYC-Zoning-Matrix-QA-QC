@@ -5,50 +5,163 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>NYC Custom Zoning Matrix Builder</title>
     <style>
-        :root { --primary-color: #1e3a8a; --accent-color: #0d9488; --bg-main: #f3f4f6; --border-color: #e5e7eb; }
-        body { font-family: Arial, sans-serif; background-color: var(--bg-main); color: #1f2937; margin: 0; padding: 20px; }
+        :root { 
+            --primary-color: #1e3a8a; 
+            --primary-light: #eff6ff; 
+            --accent-color: #0d9488; 
+            --text-main: #1f2937; 
+            --text-muted: #4b5563; 
+            --bg-main: #f3f4f6; 
+            --border-color: #e5e7eb; 
+            --mandatory-color: #ef4444; 
+        }
+        body { font-family: Arial, sans-serif; background-color: var(--bg-main); color: var(--text-main); margin: 0; padding: 20px; }
         .container { max-width: 1200px; margin: 0 auto; }
-        .card { background: white; border-radius: 8px; padding: 20px; margin-bottom: 20px; border: 1px solid var(--border-color); }
-        h2 { color: var(--primary-color); margin-top: 0; }
-        select, input[type="number"] { width: 100%; padding: 10px; margin-top: 5px; border: 1px solid #ccc; border-radius: 4px; }
-        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 15px; }
-        button { background-color: var(--accent-color); color: white; border: none; padding: 15px; width: 100%; font-size: 1.1rem; font-weight: bold; border-radius: 4px; cursor: pointer; }
+        header { background-color: var(--primary-color); color: white; padding: 20px; border-radius: 6px; text-align: center; margin-bottom: 20px; }
+        .card { background: white; border-radius: 8px; padding: 20px; margin-bottom: 20px; border: 1px solid var(--border-color); box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+        h2 { margin-top: 0; font-size: 1.2rem; color: var(--primary-color); border-bottom: 2px solid var(--primary-light); padding-bottom: 6px; }
+        label { font-size: 0.8rem; font-weight: bold; color: var(--primary-color); text-transform: uppercase; display: block; margin-bottom: 4px; margin-top: 10px; }
+        select, input[type="number"] { width: 100%; padding: 12px; border: 2px solid var(--border-color); border-radius: 4px; font-size: 1rem; box-sizing: border-box; outline: none; background: white; }
+        select:focus, input[type="number"]:focus { border-color: var(--accent-color); }
+        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 15px; margin-bottom: 15px; }
+        .checkbox-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; padding: 15px; background: #fafafa; border-radius: 6px; border: 1px solid var(--border-color); margin-top: 5px; }
+        .checkbox-label { font-weight: normal; text-transform: none; display: flex; align-items: center; gap: 8px; color: var(--text-main); cursor: pointer; margin-top: 0; }
+        .checkbox-label input { width: auto; cursor: pointer; transform: scale(1.1); }
+        button { background-color: var(--accent-color); color: white; border: none; padding: 15px; width: 100%; font-size: 1.1rem; font-weight: bold; border-radius: 4px; cursor: pointer; margin-top: 15px; transition: background 0.2s; }
         button:hover { background-color: #0f766e; }
-        table { width: 100%; border-collapse: collapse; margin-top: 15px; }
-        th, td { border: 1px solid #e5e7eb; padding: 10px; text-align: left; }
-        th { background-color: #f9fafb; }
+        table { width: 100%; border-collapse: collapse; margin-top: 15px; font-size: 0.85rem; }
+        th, td { border: 1px solid #e5e7eb; padding: 10px; text-align: left; vertical-align: top; }
+        th { background-color: var(--primary-light); color: var(--primary-color); font-weight: bold; }
+        tr:hover { background-color: #f9fafb; }
+        .metric-box { background-color: #fff; border: 2px solid var(--border-color); border-radius: 6px; padding: 15px; }
+        .metric-val { font-size: 1.4rem; font-weight: bold; color: var(--primary-color); margin-top: 5px; }
+        .metric-label { font-size: 0.75rem; text-transform: uppercase; color: var(--text-muted); font-weight: bold; }
+        .info-item { padding: 12px; background-color: #eff6ff; border-left: 4px solid #1e3a8a; border-radius: 4px; font-size: 0.9rem; }
+        .info-item strong { display: block; color: var(--primary-color); font-size: 0.75rem; text-transform: uppercase; margin-bottom: 2px; }
     </style>
 </head>
 <body>
     <div class="container">
-        <div class="card">
+        <header>
+            <h1>NYC Zoning Matrix Builder</h1>
+            <p style="margin: 4px 0 0 0; opacity: 0.85; font-size: 0.9rem;">Manual Parameter Configuration & Compliance Spreadsheet Generator</p>
+        </header>
+
+        <!-- 1. Property Parameters Form Card -->
+        <section class="card">
             <h2>1. Property Parameters</h2>
             <form id="zoningForm">
                 <div class="grid">
-                    <div><label>District</label><select id="primaryDistrict"><option>R7X</option><option>R10</option></select></div>
-                    <div><label>Lot Area (SF)</label><input type="number" id="lotArea" value="10180"></div>
+                    <div>
+                        <label for="primaryDistrict">Primary Zoning District</label>
+                        <select id="primaryDistrict">
+                            <option value="R7X" selected>R7X</option>
+                            <option value="R10">R10</option>
+                            <option value="C4-6">C4-6</option>
+                            <option value="M1">M1</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="pairedDistrict">Paired With</label>
+                        <select id="pairedDistrict">
+                            <option value="None" selected>None</option>
+                            <option value="M1-5/R7X">M1-5/R7X</option>
+                            <option value="M1-6/R10">M1-6/R10</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="overlayDistrict">Overlay District</label>
+                        <select id="overlayDistrict">
+                            <option value="None">None</option>
+                            <option value="C1-3">C1-3</option>
+                            <option value="C2-3" selected>C2-3</option>
+                            <option value="C2-4">C2-4</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="specialDistrict">Special District</label>
+                        <select id="specialDistrict">
+                            <option value="None" selected>None</option>
+                            <option value="Special Midtown District (MiD)">Special Midtown District (MiD)</option>
+                            <option value="Special Downtown Brooklyn District (DB)">Special Downtown Brooklyn District (DB)</option>
+                        </select>
+                    </div>
                 </div>
-                <button type="button" id="generateMatrixBtn">Calculate Matrix</button>
-            </form>
-        </div>
-        <section id="matrixOutputWrapper" class="card" style="display: none;">
-            <h2>Zoning Compliance Report</h2>
-            <div id="resultsArea"></div>
-            <table id="resultsTable"><thead><tr><th>Section</th><th>Parameter</th><th>Details</th></tr></thead><tbody></tbody></table>
-        </section>
-    </div>
-    <script>
-        document.getElementById("generateMatrixBtn").addEventListener("click", () => {
-            const district = document.getElementById("primaryDistrict").value;
-            const lotArea = parseFloat(document.getElementById("lotArea").value) || 0;
-            const far = district === "R10" ? 10.0 : 5.0;
-            const maxSf = lotArea * far;
-            
-            document.getElementById("resultsArea").innerHTML = `<h3>${district} - ${maxSf.toLocaleString()} ZFA SF</h3>`;
-            const tbody = document.getElementById("resultsTable").getElementsByTagName('tbody')[0];
-            tbody.innerHTML = `<tr><td>FAR</td><td>Max FAR</td><td>${far}</td></tr>`;
-            document.getElementById("matrixOutputWrapper").style.display = "block";
-        });
-    </script>
-</body>
-</html>
+
+                <div class="grid">
+                    <div>
+                        <label for="lotArea">Lot Area (SF Value)</label>
+                        <input type="number" id="lotArea" value="10180">
+                    </div>
+                    <div>
+                        <label for="lotType">Lot Configuration</label>
+                        <select id="lotType">
+                            <option value="Corner Lot">Corner Lot</option>
+                            <option value="Interior Lot" selected>Interior Lot</option>
+                            <option value="Through Lot">Through Lot</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="streetscapeTier">Streetscape Classification</label>
+                        <select id="streetscapeTier">
+                            <option value="Tier 1">Tier 1 Standard</option>
+                            <option value="Tier 2">Tier 2 Contextual</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="grid">
+                    <div>
+                        <label for="hasBalconies">Are Balconies Provided?</label>
+                        <select id="hasBalconies">
+                            <option value="No" selected>No</option>
+                            <option value="Yes">Yes</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="balconyWallTotal">Wall Face Width (ft)</label>
+                        <input type="number" id="balconyWallTotal" value="60">
+                    </div>
+                    <div>
+                        <label for="balconyWidthProvided">Provided Balcony Width (ft)</label>
+                        <input type="number" id="balconyWidthProvided" value="20">
+                    </div>
+                </div>
+
+                <div class="grid" style="grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));">
+                    <div>
+                        <label for="trackRes">Residential Track</label>
+                        <select id="trackRes">
+                            <option value="None">None</option>
+                            <option value="Residential" selected>Residential (UG II)</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="trackCf">Community Facility Track</label>
+                        <select id="trackCf">
+                            <option value="None" selected>None</option>
+                            <option value="CommunityFacility">Community Facility</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="trackComm">Commercial Track</label>
+                        <select id="trackComm">
+                            <option value="None">None</option>
+                            <option value="Commercial" selected>Commercial (UG VI)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="grid" style="grid-template-columns: 1fr;">
+                    <div>
+                        <label for="transitZone">Transit Zone Proximity Status</label>
+                        <select id="transitZone">
+                            <option value="Outside Transit Zone">Outside Transit Zone (Standard Parking)</option>
+                            <option value="Within Inner Transit Zone" selected>Within Inner Transit Zone (Exemption Active)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <label>Appended Architectural Parameters</label>
+                <div class="checkbox-grid">
+                    <label class="checkbox-label"><input type="checkbox" id="checkCurbCut"> Curb Cut Provided</label>
