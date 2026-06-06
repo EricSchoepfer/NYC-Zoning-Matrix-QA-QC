@@ -3,170 +3,138 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NYC Pro Zoning Dual-Track Tracker & Builder</title>
+    <title>NYC Custom Zoning Matrix Builder</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
     <header>
         <div class="header-container">
             <h1>NYC Zoning Matrix Builder</h1>
-            <p class="subtitle">Manual Parameter Configuration & Comprehensive NYCZR Citation Engine</p>
+            <p class="subtitle">Manual Parameter Configuration & Compliance Spreadsheet Generator</p>
         </div>
     </header>
 
     <main class="container">
-        <!-- Manual Parameter Configuration Form -->
+        <!-- Manual Parameter Entry Form -->
         <section class="card">
-            <h2>1. Primary Boundaries & Zoning Parameters</h2>
-            <p>Select your primary underlying districts, commercial overlays, special district text overrides, and parcel square footage:</p>
+            <h2>1. Property Boundaries & Zoning Parameters</h2>
+            <p class="instruction">Select the target primary districts, overlays, custom overlays, and parcel dimensions manually below:</p>
             
             <form id="zoningForm">
-                <!-- Row 1: Districts Dropdowns -->
-                <div class="search-grid">
+                <!-- Drop-down Matrix Row -->
+                <div class="search-grid" style="grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));">
                     <div>
-                        <label for="primaryDistrict">Primary Zoning District</label>
-                        <select id="primaryDistrict">
+                        <label for="primaryDistrict"><strong>Primary Zoning District</strong></label>
+                        <select id="primaryDistrict" style="margin-top: 5px;">
                             <option value="">-- Select District --</option>
                             <optgroup label="Residential (R)">
-                                <option value="R1">R1</option><option value="R2">R2</option><option value="R3">R3</option>
-                                <option value="R4">R4</option><option value="R5">R5</option><option value="R6">R6</option>
-                                <option value="R6B">R6B</option><option value="R7">R7</option><option value="R7-1">R7-1</option>
-                                <option value="R7A">R7A</option><option value="R7X" selected>R7X</option><option value="R8">R8</option>
+                                <option value="R1">R1</option>
+                                <option value="R2">R2</option>
+                                <option value="R3">R3</option>
+                                <option value="R4">R4</option>
+                                <option value="R5">R5</option>
+                                <option value="R6">R6</option>
+                                <option value="R6B">R6B</option>
+                                <option value="R7">R7</option>
+                                <option value="R7-1">R7-1</option>
+                                <option value="R7A">R7A</option>
+                                <option value="R7X" selected>R7X</option>
+                                <option value="R8">R8</option>
                                 <option value="R10">R10</option>
                             </optgroup>
                             <optgroup label="Commercial (C)">
-                                <option value="C4">C4</option><option value="C4-6">C4-6</option>
+                                <option value="C1">C1 (C1-6 to C1-9)</option>
+                                <option value="C2">C2 (C2-6 to C2-9)</option>
+                                <option value="C4">C4</option>
+                                <option value="C4-6">C4-6</option>
+                                <option value="C5">C5</option>
+                                <option value="C6">C6</option>
+                                <option value="C7">C7</option>
+                                <option value="C8">C8</option>
                             </optgroup>
                             <optgroup label="Manufacturing (M)">
                                 <option value="M1">M1</option>
+                                <option value="M2">M2</option>
+                                <option value="M3">M3</option>
                             </optgroup>
                         </select>
                     </div>
 
                     <div>
-                        <label for="pairedDistrict">Paired With</label>
-                        <select id="pairedDistrict">
+                        <label for="pairedDistrict"><strong>Paired With</strong></label>
+                        <select id="pairedDistrict" style="margin-top: 5px;">
                             <option value="None" selected>None</option>
-                            <optgroup label="Paired Mixed Use (ZR 123-11)">
-                                <option value="M1-1/R5">M1-1/R5</option><option value="M1-2/R6">M1-2/R6</option>
-                                <option value="M1-5/R7X">M1-5/R7X</option><option value="M1-6/R10">M1-6/R10</option>
+                            <optgroup label="Paired Manufacturing/Residential (ZR 123-11)">
+                                <option value="M1-1/R5">M1-1/R5</option>
+                                <option value="M1-2/R6">M1-2/R6</option>
+                                <option value="M1-3/R7">M1-3/R7</option>
+                                <option value="M1-4/R7A">M1-4/R7A</option>
+                                <option value="M1-5/R7X">M1-5/R7X</option>
+                                <option value="M1-5/R9">M1-5/R9</option>
+                                <option value="M1-6/R10">M1-6/R10</option>
                             </optgroup>
                         </select>
                     </div>
 
                     <div>
-                        <label for="overlayDistrict">Overlay District</label>
-                        <select id="overlayDistrict">
+                        <label for="overlayDistrict"><strong>Overlay District</strong></label>
+                        <select id="overlayDistrict" style="margin-top: 5px;">
                             <option value="None">None</option>
-                            <option value="C1-1">C1-1</option><option value="C1-2">C1-2</option><option value="C1-3">C1-3</option>
-                            <option value="C1-4">C1-4</option><option value="C1-5">C1-5</option><option value="C2-1">C2-1</option>
-                            <option value="C2-2">C2-2</option><option value="C2-3" selected>C2-3</option><option value="C2-4">C2-4</option>
+                            <option value="C1-1">C1-1</option>
+                            <option value="C1-2">C1-2</option>
+                            <option value="C1-3">C1-3</option>
+                            <option value="C1-4">C1-4</option>
+                            <option value="C1-5">C1-5</option>
+                            <option value="C2-1">C2-1</option>
+                            <option value="C2-2">C2-2</option>
+                            <option value="C2-3" selected>C2-3</option>
+                            <option value="C2-4">C2-4</option>
                             <option value="C2-5">C2-5</option>
                         </select>
                     </div>
 
                     <div>
-                        <label for="specialDistrict">Special District Override</label>
-                        <select id="specialDistrict">
+                        <label for="specialDistrict"><strong>Special District</strong></label>
+                        <select id="specialDistrict" style="margin-top: 5px;">
                             <option value="None" selected>None</option>
-                            <option value="Special Midtown District (MiD)">Special Midtown District (MiD)</option>
-                            <option value="Special Downtown Brooklyn District">Special Downtown Brooklyn District</option>
-                            <option value="Special Long Island City Mixed Use District">Special Long Island City Mixed Use District</option>
-                        </select>
-                    </div>
-                </div>
+                            
+                            <optgroup label="Manhattan Special Districts">
+                                <option value="Special Midtown District (MiD)">Special Midtown District (MiD)</option>
+                                <option value="Special Lower Manhattan District (LM)">Special Lower Manhattan District (LM)</option>
+                                <option value="Special Hudson Yards District (HY)">Special Hudson Yards District (HY)</option>
+                                <option value="Special West Chelsea District (WCh)">Special West Chelsea District (WCh)</option>
+                                <option value="Special Clinton District (CL)">Special Clinton District (CL)</option>
+                                <option value="Special Tribeca Mixed Use District (TMU)">Special Tribeca Mixed Use District (TMU)</option>
+                                <option value="Special SoHo-NoHo Mixed Use District (SNX)">Special SoHo-NoHo Mixed Use District (SNX)</option>
+                                <option value="Special Garment Center District (GC)">Special Garment Center District (GC)</option>
+                                <option value="Special Battery Park City District (BPC)">Special Battery Park City District (BPC)</option>
+                                <option value="Special Inwood District (In)">Special Inwood District (In)</option>
+                                <option value="Special Harlem River Waterfront District (HRW)">Special Harlem River Waterfront District (HRW)</option>
+                                <option value="Special Lincoln Square District (LSC)">Special Lincoln Square District (LSC)</option>
+                                <option value="Special Little Italy District (LI)">Special Little Italy District (LI)</option>
+                                <option value="Special Transit Land Use District (TA)">Special Transit Land Use District (TA)</option>
+                                <option value="Special United Nations Development District (UND)">Special United Nations Development District (UND)</option>
+                            </optgroup>
 
-                <!-- Row 2: Lot Dimensions & Infrastructure Profile -->
-                <div class="search-grid" style="grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); margin-top: 15px;">
-                    <div>
-                        <label for="lotArea">Lot Area (Square Footage Value)</label>
-                        <input type="number" id="lotArea" placeholder="e.g. 10180" value="10180">
-                    </div>
-                    <div>
-                        <label for="transitZone">Transit Zone Proximity Status</label>
-                        <select id="transitZone">
-                            <option value="None">Outside Transit Zone (Standard Parking)</option>
-                            <option value="Within Transit Zone" selected>Within Inner Transit Zone (ZR 25-211 Exemption)</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label for="streetscapeTier">Streetscape Tier Type</label>
-                        <select id="streetscapeTier">
-                            <option value="None">None / Non-Designated Corridor</option>
-                            <option value="Tier A" selected>Tier A Streetscape Requirement</option>
-                            <option value="Tier B">Tier B Streetscape Requirement</option>
-                            <option value="Tier C">Tier C Streetscape Requirement</option>
-                        </select>
-                    </div>
-                </div>
+                            <optgroup label="Brooklyn Special Districts">
+                                <option value="Special Downtown Brooklyn District (DB)">Special Downtown Brooklyn District (DB)</option>
+                                <option value="Special Gowanus Mixed Use District (G)">Special Gowanus Mixed Use District (G)</option>
+                                <option value="Special Greenpoint-Williamsburg District (GW)">Special Greenpoint-Williamsburg District (GW)</option>
+                                <option value="Special Brooklyn Navy Yard District (BNY)">Special Brooklyn Navy Yard District (BNY)</option>
+                                <option value="Special Atlantic Avenue District (AA)">Special Atlantic Avenue District (AA)</option>
+                                <option value="Special Bay Ridge District (BR)">Special Bay Ridge District (BR)</option>
+                                <option value="Special Coney Island District (CI)">Special Coney Island District (CI)</option>
+                                <option value="Special Ocean Parkway District (OP)">Special Ocean Parkway District (OP)</option>
+                                <option value="Special Sheepshead Bay District (SB)">Special Sheepshead Bay District (SB)</option>
+                            </optgroup>
 
-                <!-- Row 3: Land Use Matrix Controls (Multi-Track Option Groupings) -->
-                <div class="search-grid" style="grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); margin-top: 15px;">
-                    <div>
-                        <label for="useResidential">Residential Program Track</label>
-                        <select id="useResidential">
-                            <option value="None">None</option>
-                            <option value="Residential" selected>Residential (Use Group II / VI)</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label for="useCommunity">Community Facility Track</label>
-                        <select id="useCommunity">
-                            <option value="None" selected>None</option>
-                            <option value="Community Facility">Community Facility Active</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label for="useCommercial">Commercial Program Track</label>
-                        <select id="useCommercial">
-                            <option value="None">None</option>
-                            <option value="Commercial" selected>Commercial Retail Active</option>
-                        </select>
-                    </div>
-                </div>
+                            <optgroup label="Queens Special Districts">
+                                <option value="Special Long Island City Mixed Use District (LIC)">Special Long Island City Mixed Use District (LIC)</option>
+                                <option value="Special Flushing Waterfront District (FW)">Special Flushing Waterfront District (FW)</option>
+                                <option value="Special Downtown Far Rockaway District (DFR)">Special Downtown Far Rockaway District (DFR)</option>
+                                <option value="Special Downtown Jamaica District (DJ)">Special Downtown Jamaica District (DJ)</option>
+                                <option value="Special Forest Hills District (FH)">Special Forest Hills District (FH)</option>
+                                <option value="Special Willets Point District (WP)">Special Willets Point District (WP)</option>
+                                <option value="Special Southern Hunters Point District (SHP)">Special Southern Hunters Point District (SHP)</option>
+                            </optgroup>
 
-                <!-- Row 4: Advanced Street Geometry Profiles -->
-                <div class="search-grid" style="grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); margin-top: 15px;">
-                    <div>
-                        <label for="lotConfiguration">Lot Configuration Category</label>
-                        <select id="lotConfiguration">
-                            <option value="Interior Lot">Interior Lot</option>
-                            <option value="Corner Lot" selected>Corner Lot</option>
-                            <option value="Through Lot">Through Lot</option>
-                            <option value="Combination Lot">Combination / Split-Profile Lot</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label for="frontageCount">Number of Street Frontages</label>
-                        <select id="frontageCount">
-                            <option value="1">1 Frontage</option>
-                            <option value="2" selected>2 Frontages</option>
-                            <option value="3">3 Frontages</option>
-                            <option value="4">4 Frontages</option>
-                        </select>
-                    </div>
-                </div>
-
-                <!-- Container dynamically populated by JavaScript for Street Data entries -->
-                <div id="dynamicStreetWrapper" class="dynamic-entry-section"></div>
-
-                <!-- Row 5: Structural Balcony Parameters Matrix -->
-                <div class="search-grid" style="grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); margin-top: 15px;">
-                    <div>
-                        <label for="hasBalonies">Balconies Provided?</label>
-                        <select id="hasBalonies">
-                            <option value="No">No Balconies Flagged</option>
-                            <option value="Yes" selected>Yes - Balconies Present</option>
-                        </select>
-                    </div>
-                    <div id="balconyCountBlock">
-                        <label for="balconyWallCount">Wall Faces with Balconies</label>
-                        <input type="number" id="balconyWallCount" min="0" value="1">
-                    </div>
-                </div>
-
-                <!-- Container dynamically populated by JavaScript for Balcony data entry -->
-                <div id="dynamicBalconyWrapper" class="dynamic-entry-section"></div>
-
-                <!-- Row 6: Individual Enclosure & Framework Status Checks -->
-                <div class="checkbox-master-grid">
